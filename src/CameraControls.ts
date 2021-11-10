@@ -586,7 +586,6 @@ export class CameraControls extends EventDispatcher {
 				if ( this.mouseButtons.pinch === ACTION.ZOOM ) {
 
 					const newScale = this._gestureScaleStart * ( event as any ).scale;
-					console.log( "safari pinch" );
 					this.zoomTo( newScale, false );
 
 				}
@@ -835,7 +834,7 @@ export class CameraControls extends EventDispatcher {
 			this._domElement.addEventListener( 'wheel', onMouseWheel, { passive: false } );
 			this._domElement.addEventListener( 'contextmenu', onContextMenu );
 			this._domElement.addEventListener( 'gesturestart', onGestureStart );
-			this._domElement.addEventListener( 'gesturechanged', onGestureChanged );
+			this._domElement.addEventListener( 'gesturechange', onGestureChanged );
 
 			this._removeAllEventListeners = (): void => {
 
@@ -859,7 +858,7 @@ export class CameraControls extends EventDispatcher {
 				this._domElement.ownerDocument.removeEventListener( 'touchend', onTouchEnd );
 
 				this._domElement.removeEventListener( 'gesturestart', onGestureStart );
-			    this._domElement.removeEventListener( 'gesturechanged', onGestureChanged );
+			    this._domElement.removeEventListener( 'gesturechange', onGestureChanged );
 
 			};
 

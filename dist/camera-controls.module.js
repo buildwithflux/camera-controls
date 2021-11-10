@@ -534,7 +534,6 @@ var CameraControls = (function (_super) {
                     return;
                 if (_this.mouseButtons.pinch === ACTION.ZOOM) {
                     var newScale = _this._gestureScaleStart * event.scale;
-                    console.log("safari pinch");
                     _this.zoomTo(newScale, false);
                 }
             };
@@ -687,7 +686,7 @@ var CameraControls = (function (_super) {
             _this._domElement.addEventListener('wheel', onMouseWheel_1, { passive: false });
             _this._domElement.addEventListener('contextmenu', onContextMenu_1);
             _this._domElement.addEventListener('gesturestart', onGestureStart_1);
-            _this._domElement.addEventListener('gesturechanged', onGestureChanged_1);
+            _this._domElement.addEventListener('gesturechange', onGestureChanged_1);
             _this._removeAllEventListeners = function () {
                 _this._domElement.removeEventListener('pointerdown', onPointerDown_1);
                 _this._domElement.removeEventListener('mousedown', onMouseDown_1);
@@ -702,7 +701,7 @@ var CameraControls = (function (_super) {
                 _this._domElement.ownerDocument.removeEventListener('mouseup', onMouseUp_1);
                 _this._domElement.ownerDocument.removeEventListener('touchend', onTouchEnd_1);
                 _this._domElement.removeEventListener('gesturestart', onGestureStart_1);
-                _this._domElement.removeEventListener('gesturechanged', onGestureChanged_1);
+                _this._domElement.removeEventListener('gesturechange', onGestureChanged_1);
             };
             _this.cancel = function () {
                 cancelDragging_1();
