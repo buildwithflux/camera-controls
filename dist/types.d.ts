@@ -48,6 +48,7 @@ export interface MouseButtons {
     middle: mouseButtonAction;
     right: mouseButtonAction;
     wheel: mouseWheelAction;
+    pinch: mouseWheelAction;
     shiftLeft: mouseButtonAction;
 }
 export interface Touches {

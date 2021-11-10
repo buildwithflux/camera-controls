@@ -64,6 +64,8 @@ export declare class CameraControls extends EventDispatcher {
     protected _updatedLastTime: boolean;
     protected _elementRect: _THREE.Vector4;
     protected _activePointers: PointerInput[];
+    protected _gesturing: boolean;
+    protected _gestureScaleStart: null | number;
     constructor(camera: _THREE.PerspectiveCamera | _THREE.OrthographicCamera, domElement: HTMLElement);
     camera: _THREE.PerspectiveCamera | _THREE.OrthographicCamera;
     enabled: boolean;
@@ -96,7 +98,7 @@ export declare class CameraControls extends EventDispatcher {
     setTarget(targetX: number, targetY: number, targetZ: number, enableTransition?: boolean): Promise<void>;
     setFocalOffset(x: number, y: number, z: number, enableTransition?: boolean): Promise<void>;
     setOrbitPoint(targetX: number, targetY: number, targetZ: number): void;
-    setBoundary(box3: _THREE.Box3): void;
+    setBoundary(box3?: _THREE.Box3): void;
     setViewport(viewportOrX: _THREE.Vector4 | number | null, y: number, width: number, height: number): void;
     getDistanceToFitBox(width: number, height: number, depth: number): number;
     getDistanceToFit(width: number, height: number, depth: number): number;

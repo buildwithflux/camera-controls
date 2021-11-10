@@ -29,6 +29,7 @@ import { EventDispatcher, Listener } from './EventDispatcher';
 const isBrowser = typeof window !== 'undefined';
 const isMac = isBrowser && /Mac/.test( navigator.platform );
 const isPointerEventsNotSupported = ! ( isBrowser && 'PointerEvent' in window ); // Safari 12 does not support PointerEvents API
+const isTouchScreen = isBrowser && "ontouchstart" in window;
 const readonlyACTION = Object.freeze( ACTION );
 const TOUCH_DOLLY_FACTOR = 1 / 8;
 
@@ -166,6 +167,8 @@ export class CameraControls extends EventDispatcher {
 	protected _elementRect: _THREE.Vector4;
 
 	protected _activePointers: PointerInput[] = [];
+	protected _gesturing = false;
+	protected _gestureScaleStart: null | number = null;
 
 	constructor(
 		camera: _THREE.PerspectiveCamera | _THREE.OrthographicCamera,
@@ -237,6 +240,7 @@ export class CameraControls extends EventDispatcher {
 				isOrthographicCamera( this._camera ) ? ACTION.ZOOM :
 				ACTION.NONE,
 			shiftLeft: ACTION.NONE,
+			pinch: ACTION.NONE,
 			// We can also add altLeft and etc if someone wants...
 		};
 
@@ -561,18 +565,51 @@ export class CameraControls extends EventDispatcher {
 
 			};
 
+			const onGestureStart = () => {
+
+				if ( ! this._enabled || this.mouseButtons.pinch === ACTION.NONE || isTouchScreen ) return;
+
+				this._gesturing = true;
+				this._gestureScaleStart = this._zoom;
+
+			};
+
+			const onGestureChanged = ( event: Event ) => {
+
+				if (
+					! this._enabled ||
+                    this.mouseButtons.pinch === ACTION.NONE ||
+                    isTouchScreen ||
+                    typeof this._gestureScaleStart !== "number"
+				)
+					return;
+				if ( this.mouseButtons.pinch === ACTION.ZOOM ) {
+
+					const newScale = this._gestureScaleStart * ( event as any ).scale;
+					console.log( "safari pinch" );
+					this.zoomTo( newScale, false );
+
+				}
+
+			};
+
 			let lastScrollTimeStamp = - 1;
 
 			const onMouseWheel = ( event: WheelEvent ): void => {
 
-				if ( ! this._enabled || this.mouseButtons.wheel === ACTION.NONE ) return;
+				const state =
+                    event.ctrlKey && this.mouseButtons.pinch !== ACTION.NONE
+                    	? this.mouseButtons.pinch
+                    	: this.mouseButtons.wheel;
+
+				if ( ! this._enabled || state === ACTION.NONE ) return;
 
 				event.preventDefault();
 
 				if (
 					this.dollyToCursor ||
-					this.mouseButtons.wheel === ACTION.ROTATE ||
-					this.mouseButtons.wheel === ACTION.TRUCK
+					state === ACTION.ROTATE ||
+					state === ACTION.TRUCK
 				) {
 
 					const now = performance.now();
@@ -589,7 +626,7 @@ export class CameraControls extends EventDispatcher {
 				const x = this.dollyToCursor ? ( event.clientX - this._elementRect.x ) / this._elementRect.z *   2 - 1 : 0;
 				const y = this.dollyToCursor ? ( event.clientY - this._elementRect.y ) / this._elementRect.w * - 2 + 1 : 0;
 
-				switch ( this.mouseButtons.wheel ) {
+				switch ( state ) {
 
 					case ACTION.ROTATE: {
 
@@ -797,6 +834,8 @@ export class CameraControls extends EventDispatcher {
 			this._domElement.addEventListener( 'pointercancel', onPointerUp );
 			this._domElement.addEventListener( 'wheel', onMouseWheel, { passive: false } );
 			this._domElement.addEventListener( 'contextmenu', onContextMenu );
+			this._domElement.addEventListener( 'gesturestart', onGestureStart );
+			this._domElement.addEventListener( 'gesturechanged', onGestureChanged );
 
 			this._removeAllEventListeners = (): void => {
 
@@ -818,6 +857,9 @@ export class CameraControls extends EventDispatcher {
 				this._domElement.ownerDocument.removeEventListener( 'pointerup', onPointerUp );
 				this._domElement.ownerDocument.removeEventListener( 'mouseup', onMouseUp );
 				this._domElement.ownerDocument.removeEventListener( 'touchend', onTouchEnd );
+
+				this._domElement.removeEventListener( 'gesturestart', onGestureStart );
+			    this._domElement.removeEventListener( 'gesturechanged', onGestureChanged );
 
 			};
 

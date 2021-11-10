@@ -161,6 +161,7 @@ var EventDispatcher = (function () {
 var isBrowser = typeof window !== 'undefined';
 var isMac = isBrowser && /Mac/.test(navigator.platform);
 var isPointerEventsNotSupported = !(isBrowser && 'PointerEvent' in window);
+var isTouchScreen = isBrowser && "ontouchstart" in window;
 var readonlyACTION = Object.freeze(ACTION);
 var TOUCH_DOLLY_FACTOR = 1 / 8;
 var THREE;
@@ -218,6 +219,8 @@ var CameraControls = (function (_super) {
         _this._needsUpdate = true;
         _this._updatedLastTime = false;
         _this._activePointers = [];
+        _this._gesturing = false;
+        _this._gestureScaleStart = null;
         _this._truckInternal = function (deltaX, deltaY, dragToOffset) {
             if (isPerspectiveCamera(_this._camera)) {
                 var offset = _v3A.copy(_this._camera.position).sub(_this._target);
@@ -319,6 +322,7 @@ var CameraControls = (function (_super) {
                 isOrthographicCamera(_this._camera) ? ACTION.ZOOM :
                     ACTION.NONE,
             shiftLeft: ACTION.NONE,
+            pinch: ACTION.NONE,
         };
         _this.touches = {
             one: ACTION.TOUCH_ROTATE,
@@ -516,14 +520,35 @@ var CameraControls = (function (_super) {
                 }
                 endDragging_1();
             };
+            var onGestureStart_1 = function () {
+                if (!_this._enabled || _this.mouseButtons.pinch === ACTION.NONE || isTouchScreen)
+                    return;
+                _this._gesturing = true;
+                _this._gestureScaleStart = _this._zoom;
+            };
+            var onGestureChanged_1 = function (event) {
+                if (!_this._enabled ||
+                    _this.mouseButtons.pinch === ACTION.NONE ||
+                    isTouchScreen ||
+                    typeof _this._gestureScaleStart !== "number")
+                    return;
+                if (_this.mouseButtons.pinch === ACTION.ZOOM) {
+                    var newScale = _this._gestureScaleStart * event.scale;
+                    console.log("safari pinch");
+                    _this.zoomTo(newScale, false);
+                }
+            };
             var lastScrollTimeStamp_1 = -1;
             var onMouseWheel_1 = function (event) {
-                if (!_this._enabled || _this.mouseButtons.wheel === ACTION.NONE)
+                var state = event.ctrlKey && _this.mouseButtons.pinch !== ACTION.NONE
+                    ? _this.mouseButtons.pinch
+                    : _this.mouseButtons.wheel;
+                if (!_this._enabled || state === ACTION.NONE)
                     return;
                 event.preventDefault();
                 if (_this.dollyToCursor ||
-                    _this.mouseButtons.wheel === ACTION.ROTATE ||
-                    _this.mouseButtons.wheel === ACTION.TRUCK) {
+                    state === ACTION.ROTATE ||
+                    state === ACTION.TRUCK) {
                     var now = performance.now();
                     if (lastScrollTimeStamp_1 - now < 1000)
                         _this._getClientRect(_this._elementRect);
@@ -533,7 +558,7 @@ var CameraControls = (function (_super) {
                 var delta = (event.deltaMode === 1) ? event.deltaY / deltaYFactor : event.deltaY / (deltaYFactor * 10);
                 var x = _this.dollyToCursor ? (event.clientX - _this._elementRect.x) / _this._elementRect.z * 2 - 1 : 0;
                 var y = _this.dollyToCursor ? (event.clientY - _this._elementRect.y) / _this._elementRect.w * -2 + 1 : 0;
-                switch (_this.mouseButtons.wheel) {
+                switch (state) {
                     case ACTION.ROTATE: {
                         _this._rotateInternal(event.deltaX, event.deltaY);
                         break;
@@ -661,6 +686,8 @@ var CameraControls = (function (_super) {
             _this._domElement.addEventListener('pointercancel', onPointerUp_1);
             _this._domElement.addEventListener('wheel', onMouseWheel_1, { passive: false });
             _this._domElement.addEventListener('contextmenu', onContextMenu_1);
+            _this._domElement.addEventListener('gesturestart', onGestureStart_1);
+            _this._domElement.addEventListener('gesturechanged', onGestureChanged_1);
             _this._removeAllEventListeners = function () {
                 _this._domElement.removeEventListener('pointerdown', onPointerDown_1);
                 _this._domElement.removeEventListener('mousedown', onMouseDown_1);
@@ -674,6 +701,8 @@ var CameraControls = (function (_super) {
                 _this._domElement.ownerDocument.removeEventListener('pointerup', onPointerUp_1);
                 _this._domElement.ownerDocument.removeEventListener('mouseup', onMouseUp_1);
                 _this._domElement.ownerDocument.removeEventListener('touchend', onTouchEnd_1);
+                _this._domElement.removeEventListener('gesturestart', onGestureStart_1);
+                _this._domElement.removeEventListener('gesturechanged', onGestureChanged_1);
             };
             _this.cancel = function () {
                 cancelDragging_1();
