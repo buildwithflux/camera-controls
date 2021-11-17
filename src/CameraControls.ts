@@ -565,12 +565,13 @@ export class CameraControls extends EventDispatcher {
 
 			};
 
-			const onGestureStart = () => {
+			const onGestureStart = ( event: Event ) => {
 
 				if ( ! this._enabled || this.mouseButtons.pinch === ACTION.NONE || isTouchScreen ) return;
 
 				this._gesturing = true;
 				this._gestureScaleStart = this._zoom;
+				event.preventDefault();
 
 			};
 
@@ -583,12 +584,28 @@ export class CameraControls extends EventDispatcher {
                     typeof this._gestureScaleStart !== "number"
 				)
 					return;
+
+
+				this._getClientRect( this._elementRect );
+				const x = this.dollyToCursor ? ( ( event as any ).clientX - this._elementRect.x ) / this._elementRect.z *   2 - 1 : 0;
+				const y = this.dollyToCursor ? ( ( event as any ).clientY - this._elementRect.y ) / this._elementRect.w * - 2 + 1 : 0;
+				const FACTOR = 0.5;
+
 				if ( this.mouseButtons.pinch === ACTION.ZOOM ) {
 
-					const newScale = this._gestureScaleStart * ( event as any ).scale;
-					this.zoomTo( newScale, false );
+					const to = ( 1 - ( event as any ).scale ) * FACTOR;
+					this._zoomInternal( to, x, y );
 
 				}
+
+				if ( this.mouseButtons.pinch === ACTION.DOLLY ) {
+
+					const to = ( 1 - ( event as any ).scale ) * FACTOR;
+					this._dollyInternal( to, x, y );
+
+				}
+
+				event.preventDefault();
 
 			};
 
