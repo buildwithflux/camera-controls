@@ -526,11 +526,12 @@
 	                }
 	                endDragging_1();
 	            };
-	            var onGestureStart_1 = function () {
+	            var onGestureStart_1 = function (event) {
 	                if (!_this._enabled || _this.mouseButtons.pinch === ACTION.NONE || isTouchScreen)
 	                    return;
 	                _this._gesturing = true;
 	                _this._gestureScaleStart = _this._zoom;
+	                event.preventDefault();
 	            };
 	            var onGestureChanged_1 = function (event) {
 	                if (!_this._enabled ||
@@ -538,10 +539,19 @@
 	                    isTouchScreen ||
 	                    typeof _this._gestureScaleStart !== "number")
 	                    return;
+	                _this._getClientRect(_this._elementRect);
+	                var x = _this.dollyToCursor ? (event.clientX - _this._elementRect.x) / _this._elementRect.z * 2 - 1 : 0;
+	                var y = _this.dollyToCursor ? (event.clientY - _this._elementRect.y) / _this._elementRect.w * -2 + 1 : 0;
+	                var FACTOR = 0.5;
 	                if (_this.mouseButtons.pinch === ACTION.ZOOM) {
-	                    var newScale = _this._gestureScaleStart * event.scale;
-	                    _this.zoomTo(newScale, false);
+	                    var to = (1 - event.scale) * FACTOR;
+	                    _this._zoomInternal(to, x, y);
 	                }
+	                if (_this.mouseButtons.pinch === ACTION.DOLLY) {
+	                    var to = (1 - event.scale) * FACTOR;
+	                    _this._dollyInternal(to, x, y);
+	                }
+	                event.preventDefault();
 	            };
 	            var lastScrollTimeStamp_1 = -1;
 	            var onMouseWheel_1 = function (event) {
