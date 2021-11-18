@@ -966,7 +966,7 @@
 	                approxEquals(this._target.z, this._targetEnd.z, this.restThreshold);
 	        return this._createOnRestPromise(resolveImmediately);
 	    };
-	    CameraControls.prototype.fitToBox = function (box3OrObject, enableTransition, _a) {
+	    CameraControls.prototype.fitToBox = function (box3OrObject, enableTransition, _a, lock) {
 	        var _b = _a === void 0 ? {} : _a, _c = _b.paddingLeft, paddingLeft = _c === void 0 ? 0 : _c, _d = _b.paddingRight, paddingRight = _d === void 0 ? 0 : _d, _e = _b.paddingBottom, paddingBottom = _e === void 0 ? 0 : _e, _f = _b.paddingTop, paddingTop = _f === void 0 ? 0 : _f;
 	        var promises = [];
 	        var aabb = box3OrObject.isBox3
@@ -976,8 +976,16 @@
 	            console.warn('camera-controls: fitTo() cannot be used with an empty box. Aborting');
 	            Promise.resolve();
 	        }
-	        var theta = roundToStep(this._sphericalEnd.theta, PI_HALF);
-	        var phi = roundToStep(this._sphericalEnd.phi, PI_HALF);
+	        var theta;
+	        var phi;
+	        if (!lock) {
+	            theta = roundToStep(this._sphericalEnd.theta, PI_HALF);
+	            phi = roundToStep(this._sphericalEnd.phi, PI_HALF);
+	        }
+	        else {
+	            theta = lock === "front" ? 0 : Math.PI;
+	            phi = lock === "front" ? 0 : Math.PI;
+	        }
 	        promises.push(this.rotateTo(theta, phi, enableTransition));
 	        var normal = _v3A.setFromSpherical(this._sphericalEnd).normalize();
 	        var rotation = _quaternionA.setFromUnitVectors(normal, _AXIS_Z);

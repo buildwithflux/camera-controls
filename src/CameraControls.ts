@@ -1280,7 +1280,7 @@ export class CameraControls extends EventDispatcher {
 		paddingRight = 0,
 		paddingBottom = 0,
 		paddingTop = 0
-	}: Partial<FitToOptions> = {} ): Promise<void[]> {
+	}: Partial<FitToOptions> = {}, lock?: "front" | "back" ): Promise<void[]> {
 
 		const promises = [];
 		const aabb = ( box3OrObject as _THREE.Box3 ).isBox3
@@ -1295,8 +1295,15 @@ export class CameraControls extends EventDispatcher {
 		}
 
 		// round to closest axis ( forward | backward | right | left | top | bottom )
-		const theta = roundToStep( this._sphericalEnd.theta, PI_HALF );
-		const phi   = roundToStep( this._sphericalEnd.phi,   PI_HALF );
+        let theta;
+        let phi;
+        if (!lock) {
+            theta = roundToStep( this._sphericalEnd.theta, PI_HALF );
+		    phi   = roundToStep( this._sphericalEnd.phi,   PI_HALF );
+        } else {
+            theta = lock === "front" ? 0 : Math.PI;
+            phi = lock === "front" ? 0 : Math.PI;
+        }
 
 		promises.push( this.rotateTo( theta, phi, enableTransition ) );
 

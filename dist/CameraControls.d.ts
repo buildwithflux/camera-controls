@@ -89,7 +89,7 @@ export declare class CameraControls extends EventDispatcher {
     truck(x: number, y: number, enableTransition?: boolean): Promise<void>;
     forward(distance: number, enableTransition?: boolean): Promise<void>;
     moveTo(x: number, y: number, z: number, enableTransition?: boolean): Promise<void>;
-    fitToBox(box3OrObject: _THREE.Box3 | _THREE.Object3D, enableTransition: boolean, { paddingLeft, paddingRight, paddingBottom, paddingTop }?: Partial<FitToOptions>): Promise<void[]>;
+    fitToBox(box3OrObject: _THREE.Box3 | _THREE.Object3D, enableTransition: boolean, { paddingLeft, paddingRight, paddingBottom, paddingTop }?: Partial<FitToOptions>, lock?: "front" | "back"): Promise<void[]>;
     fitTo(box3OrObject: _THREE.Box3 | _THREE.Object3D, enableTransition: boolean, fitToOptions?: Partial<FitToOptions>): Promise<void[]>;
     fitToSphere(sphereOrMesh: _THREE.Sphere | _THREE.Object3D, enableTransition: boolean): Promise<void[]>;
     setLookAt(positionX: number, positionY: number, positionZ: number, targetX: number, targetY: number, targetZ: number, enableTransition?: boolean): Promise<void>;
