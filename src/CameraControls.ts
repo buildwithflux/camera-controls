@@ -109,6 +109,7 @@ export class CameraControls extends EventDispatcher {
 	dollyToCursor = false;
 	dragToOffset = false;
 	verticalDragToForward = false;
+	fixedZ = true;
 
 	boundaryFriction = 0.0;
 
@@ -1899,6 +1900,7 @@ export class CameraControls extends EventDispatcher {
 				const divisor = quaternion.dot( camera.up );
 				const distance = approxZero( divisor ) ? - worldPosition.dot( camera.up ) : - worldPosition.dot( camera.up ) / divisor;
 				const cursor = _v3C.copy( worldPosition ).add( quaternion.multiplyScalar( distance ) );
+				if (this.fixedZ) cursor.z = 0;
 
 				this._targetEnd.lerp( cursor, 1 - camera.zoom / this._dollyControlAmount );
 				this._target.copy( this._targetEnd );
