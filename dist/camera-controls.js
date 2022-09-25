@@ -212,6 +212,7 @@
 	        _this.dollyToCursor = false;
 	        _this.dragToOffset = false;
 	        _this.verticalDragToForward = false;
+	        _this.fixedZ = true;
 	        _this.boundaryFriction = 0.0;
 	        _this.restThreshold = 0.01;
 	        _this.colliderMeshes = [];
@@ -1279,6 +1280,8 @@
 	                var divisor = quaternion.dot(camera.up);
 	                var distance = approxZero(divisor) ? -worldPosition.dot(camera.up) : -worldPosition.dot(camera.up) / divisor;
 	                var cursor = _v3C.copy(worldPosition).add(quaternion.multiplyScalar(distance));
+	                if (this.fixedZ)
+	                    cursor.z = 0;
 	                this._targetEnd.lerp(cursor, 1 - camera.zoom / this._dollyControlAmount);
 	                this._target.copy(this._targetEnd);
 	            }

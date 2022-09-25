@@ -24,6 +24,7 @@ export declare class CameraControls extends EventDispatcher {
     dollyToCursor: boolean;
     dragToOffset: boolean;
     verticalDragToForward: boolean;
+    fixedZ: boolean;
     boundaryFriction: number;
     restThreshold: number;
     colliderMeshes: _THREE.Object3D[];
